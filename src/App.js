@@ -1,0 +1,96 @@
+import { useState, useEffect, useRef } from "react";
+import { SpeedInsights } from '@vercel/speed-insights/react';
+
+// --- GLOBAL CONFIG & DB KEYS ---
+const DB_KEYS = {
+  items: "freshkid-products",
+  orders: "freshkid-orders",
+  vault: "freshkid-admin-pw", // renamed from adminPw for flavor
+};
+
+// Quick fix for currency formatting
+const naira = (amt) => "₦" + Number(amt).toLocaleString("en-NG");
+
+const CATEGORY_THEMES = {
+  "New": "#00c853",
+  "UK Used": "#2979ff",
+  "Nigeria Used": "#ff6d00",
+  "Refurbished": "#aa00ff",
+};
+
+// --------------------------------------------------------
+// TELEGRAM NOTIFIER
+// --------------------------------------------------------
+async function pingAdmin(orderData) {
+  const config = await loadData("freshkid-tg-settings", null);
+  if (!config?.token || !config?.chatId) return;
+
+  const summary = orderData.items
+    .map(i => `• ${i.name} (${i.condition}) x${i.qty}`)
+    .join("\n");
+
+  const text = `🚀 *NEW FRESHKID ORDER*\n\n` +
+               `Client: ${orderData.name}\n` +
+               `Phone: ${orderData.phone}\n\n` +
+               `Items:\n${summary}\n\n` +
+               `Total: ${naira(orderData.total)}`;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${config.token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        chat_id: config.chatId, 
+        text, 
+        parse_mode: "Markdown" 
+      }),
+    });
+  } catch (err) {
+    console.error("TG Alert Failed:", err);
+  }
+}
+
+// --------------------------------------------------------
+// CORE APP LOGIC
+// --------------------------------------------------------
+export default function FreshKidApp() {
+  const [view, setView] = useState("shop"); 
+  const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [isLogged, setIsLogged] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Initial Data Fetch
+  useEffect(() => {
+    async function init() {
+      // Use Promise.all to keep it snappy
+      const [p, o] = await Promise.all([
+        loadData(DB_KEYS.items, defaultProducts),
+        loadData(DB_KEYS.orders, [])
+      ]);
+      setProducts(p);
+      setLoading(false);
+    }
+    init();
+  }, []);
+
+  const handleAddToCart = (item) => {
+    setCart(prev => {
+      const exists = prev.find(i => i.id === item.id);
+      if (exists) {
+        return prev.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i);
+      }
+      return [...prev, { ...item, qty: 1 }];
+    });
+    // Trigger toast here...
+  };
+
+  return (
+    <div>
+      {/* Your existing app JSX here */}
+      <SpeedInsights />
+    </div>
+  );
+
+  // ... rest of the logic
+}
