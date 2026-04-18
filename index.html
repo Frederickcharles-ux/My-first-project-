@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freshkid Gadgets Hub | No. 1 Sure Plug</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav>
+        <div class="container nav-flex">
+            <div class="logo">FRESHKID<span>GADGETS</span></div>
+            <div class="nav-links">
+                <a href="#inventory">Inventory</a>
+                <a href="admin.html" class="admin-link">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <h1>FRESHKID GADGETS HUB</h1>
+            <p>Your No. 1 Sure Plug in Africa. Premium Quality. Guaranteed Trust.</p>
+            <a href="#inventory" class="cta-btn">View Latest Drops</a>
+        </div>
+    </header>
+
+    <section id="inventory" class="container">
+        <h2 class="section-title">Available Stock</h2>
+        <div class="product-grid" id="productDisplay">
+            </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Freshkid Gadgets Hub. Built for Excellence.</p>
+    </footer>
+
+    <script>
+        function loadProducts() {
+            const display = document.getElementById('productDisplay');
+            const products = JSON.parse(localStorage.getItem('phones')) || [];
+            
+            if (products.length === 0) {
+                display.innerHTML = '<p style="grid-column: 1/-1; text-align: center; opacity: 0.6;">New stock arriving soon. Check back shortly!</p>';
+                return;
+            }
+
+            display.innerHTML = products.map((p) => `
+                <div class="card">
+                    <div class="badge">Authentic</div>
+                    <h3>${p.model}</h3>
+                    <p class="price">₦${p.price}</p>
+                    <a href="https://wa.me/2348136119244?text=Hello%20Freshkid,%20I%20am%20interested%20in%20the%20${encodeURIComponent(p.model)}.%20Is%20it%20available?" 
+                       class="wa-btn" target="_blank">Order via WhatsApp</a>
+                </div>
+            `).join('');
+        }
+        window.onload = loadProducts;
+    </script>
+</body>
+</html>
