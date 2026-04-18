@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Freshkid</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+
+    <div class="admin-container">
+        <div class="admin-card">
+            <h2>Post New Stock</h2>
+            <p style="margin-bottom: 20px; opacity: 0.7;">Fill this out to update your storefront.</p>
+            
+            <label>Phone Model</label>
+            <input type="text" id="phoneModel" placeholder="e.g. iPhone 15 Pro Max">
+            
+            <label>Price (Naira)</label>
+            <input type="text" id="phonePrice" placeholder="e.g. 1,250,000">
+            
+            <button onclick="addPhone()" class="save-btn">Upload to Site</button>
+            <p id="statusMsg"></p>
+            
+            <hr style="border: 0; border-top: 1px solid #30363d; margin: 30px 0;">
+            
+            <button onclick="clearStock()" class="delete-btn">Clear All Inventory</button>
+            <br>
+            <a href="index.html" style="color: #007bff; text-decoration: none; display: block; margin-top: 20px; font-size: 0.9rem;">← Back to Storefront</a>
+        </div>
+    </div>
+
+    <script>
+        function addPhone() {
+            const model = document.getElementById('phoneModel').value;
+            const price = document.getElementById('phonePrice').value;
+            const status = document.getElementById('statusMsg');
+
+            if(model && price) {
+                let products = JSON.parse(localStorage.getItem('phones')) || [];
+                products.push({ model, price });
+                localStorage.setItem('phones', JSON.stringify(products));
+                
+                status.innerText = "Successfully uploaded!";
+                status.style.color = "#25D366";
+                
+                document.getElementById('phoneModel').value = '';
+                document.getElementById('phonePrice').value = '';
+                
+                setTimeout(() => { status.innerText = ""; }, 3000);
+            } else {
+                alert("Please fill in both fields");
+            }
+        }
+
+        function clearStock() {
+            if(confirm("Are you sure you want to delete all stock listings?")) {
+                localStorage.removeItem('phones');
+                alert("Inventory cleared.");
+            }
+        }
+    </script>
+</body>
+</html>
